@@ -1,0 +1,54 @@
+.concept {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  height: 400px;
+  width: 410px;
+}
+
+.concept_window {
+  border: 1px solid black;
+  background: white;
+  border-radius: 1px;
+}
+
+.concept_topbar {
+  height: 16px;
+  width: 100%;
+  border-bottom: 1px solid black;
+  background: black;
+  position: relative;
+}
+
+.concept_topbar .concept_topbar_close {
+  height: 100%;
+  width: 16px;
+  position: absolute;
+  right: 0;
+  background: white;
+  border-left: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+.concept_topbar .concept_topbar_close:hover {
+  cursor: pointer;
+  background: red;
+}
+
+.concept_content {
+  padding: 40px;
+}
+
+.concept_content h1 {
+  font-family: 'ITC Souvenir', serif;
+  font-size: 24px;
+  letter-spacing: 1.5px;
+  line-height: 30px;
+  margin-top: 0;
+}
+
+.concept_content p, .concept_content ul {
+  font-family: 'ITC Avant Garde Gothic Pro', sans-serif;
+  font-size: 1rem;
+  line-height: 1.5rem;
+}

@@ -1,3 +1,43 @@
+let colors = {
+  'green': 0x3BDAA5,
+  'tan': 0xF4E3CF,
+  'lightyellow': 0xFFEEAB,
+  'brownish': 0xE16641,
+  'skyblue': 0xA4D1E9,
+  'red': 0xFC3F30,
+  'pink': 0xFCC8C8,
+  'purple': 0xD2B7FF,
+  'yellow': 0xFFEC5F,
+  'blue': 0x0091E2,
+  'white': 0xffffff,
+  'gray': 0xCFD1D2
+};
+
+let windows = [];
+
+
+function PageWindow(id, parentId) {
+  // jQuery('<div/>', {
+  //   id: id,
+  //   class: 'concept'
+  // }).appendTo(parentId);
+
+  $.get("/concept/01", function(data){
+    console.log(id);
+    console.log($(id));
+      $('#concept-01').append(data);
+
+      $('#window-close').click(function(e){
+        console.log(e);
+        let intoTheVoid = $(windows[0].id).children('div:first').detach();
+      });
+
+      let arenaUrl = 'https://www.are.na/m-att/findings-in-rhythm';
+  });
+
+  this.id = id;
+}
+
 function Canvas(width, height, id){
 
       // custom global variables
@@ -83,7 +123,7 @@ function Canvas(width, height, id){
       console.log(this.cubeX, this.cubeY, this.cubeZ);
     }
 
-    // for mouse intersections 
+    // for mouse intersections
     raycaster = new THREE.Raycaster;
 
     // when the mouse moves, call the given function
@@ -128,6 +168,10 @@ function Canvas(width, height, id){
     function onDocumentMouseUp(event) {
       if(INTERSECTED) {
         INTERSECTED.scale.set(1, 1, 1);
+
+        let id = '#' + INTERSECTED.name;
+        console.log(id);
+        windows.push(new PageWindow(id, 'body'));
       }
     }
 

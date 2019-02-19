@@ -1,8 +1,9 @@
 const Concept = require('../models/concept.model');
+const path = require('path');
 
 //Simple version, without validation or sanitation
 exports.test = function (req, res) {
-    res.send('Greetings from the Test controller!');
+    res.sendFile(path.resolve(__dirname + '/../views/concept.html'));
 };
 
 exports.concept_create = function (req, res) {
