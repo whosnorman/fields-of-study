@@ -1,0 +1,9 @@
+.object--is-hovered {
+  cursor: pointer;
+}
+
+.field {
+  width: 700px;
+  height: 700px;
+  position: relative;
+}

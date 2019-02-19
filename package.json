@@ -1,0 +1,24 @@
+{
+  "name": "fields-of-study",
+  "version": "1.0.0",
+  "description": "building to be part of the learning gardens network, a space to organize your realms of exploration",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mattohagan/fields-of-study.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mattohagan/fields-of-study/issues"
+  },
+  "homepage": "https://github.com/mattohagan/fields-of-study#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "mongoose": "^5.4.13"
+  }
+}
