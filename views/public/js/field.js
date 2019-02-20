@@ -32,10 +32,49 @@ function PageWindow(id, parentId) {
         let intoTheVoid = $(windows[0].id).children('div:first').detach();
       });
 
-      let arenaUrl = 'https://www.are.na/m-att/findings-in-rhythm';
+      let baseUrl = 'http://api.are.na/v2/channels/';
+      let channel = 'findings-in-rhythm';
+
+      $.get(baseUrl + channel, function( data ) {
+          let contents = data.contents;
+          for(let i = 0; i < contents.length; i++){
+            let html = createHtmlFromBlock(contents[i]);
+
+            $('<div/>', {
+              class: 'arena_block',
+              html: html
+            }).appendTo('#arena-01');
+          }
+      });
   });
 
   this.id = id;
+}
+
+function createHtmlFromBlock(block){
+  let html = '';
+
+  console.log(block);
+
+  switch(block.class){
+    case 'Text':
+      html += block.content_html;
+      break;
+    case 'Channel':
+      html += '<p>';
+      html += block.title;
+      html += '<br><br>';
+      html += "<i>go to channel</i> <span style='font-size: 1.2rem;'> ⤳</span>";
+      html += '</p>';
+      break;
+    case 'Image':
+      html += '<img src="' + block.image.display.url + '"/>';
+      break;
+    default:
+      break;
+  }
+
+  return html;
 }
 
 function Canvas(width, height, id){
