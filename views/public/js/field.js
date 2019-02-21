@@ -10,6 +10,7 @@ let colors = {
   'yellow': 0xFFEC5F,
   'blue': 0x0091E2,
   'white': 0xffffff,
+  'black': 0x000000,
   'gray': 0xCFD1D2
 };
 
@@ -80,12 +81,11 @@ function createHtmlFromBlock(block){
 function Canvas(width, height, id){
 
       // custom global variables
-    var cube;
     var raycaster, mouse = {
         x: 0,
         y: 0
       },
-      INTERSECTED;
+      INTERSECTED = null;
 
     var scene = new THREE.Scene();
   	var camera = new THREE.PerspectiveCamera(75, width/height, 1, 10000);
@@ -101,31 +101,9 @@ function Canvas(width, height, id){
 
   	var renderer = new THREE.WebGLRenderer({ alpha: true });
   	renderer.setSize(width, height);
+    // renderer.antialias = true;
   	document.getElementById(id).appendChild(renderer.domElement);
 
-    let boxSize = 100;
-    var geometry = new THREE.BoxGeometry(boxSize, boxSize, boxSize, 1, 1, 1);
-    // var geometry = new THREE.OctahedronGeometry(boxSize, 1);
-
-  	var material = new THREE.MeshBasicMaterial({color: 0xffffff});
-  	var cube = new THREE.Mesh(geometry, material);
-    cube.position.y = 75;
-
-    this.cubeX = 0;
-    this.cubeY = 75;
-    this.cubeZ = 0;
-
-
-    // upper and lower limit = (width / 2) - (objectWidth / 2)
-
-    var geo = new THREE.EdgesGeometry( cube.geometry );
-    var mat = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 10} );
-    var wireframe = new THREE.LineSegments( geo, mat );
-    wireframe.renderOrder = 1; // make sure wireframes are rendered 2nd
-    cube.add( wireframe );
-    cube.name = 'concept-01';
-
-  	scene.add(cube);
 
     let that = this;
   	function render() {
@@ -136,9 +114,15 @@ function Canvas(width, height, id){
       camera.position.z = that.cameraZ;
       camera.lookAt(0, 0, 0);
 
-      cube.position.x = that.cubeX;
-      cube.position.y = that.cubeY;
-      cube.position.z = that.cubeZ;
+      // object.updatePosition(cubeX, cubeY, cubeZ);
+
+      // cube.position.x = that.cubeX;
+      // cube.position.y = that.cubeY;
+      // cube.position.z = that.cubeZ;
+
+      for(let i = 0; i < fieldArr.length; i++){
+        fieldArr[i].move();
+      }
 
   		renderer.render(scene, camera);
       update();
@@ -156,7 +140,8 @@ function Canvas(width, height, id){
     gridHelper.name = 'field';
     scene.add( gridHelper );
 
-    this.cubeFieldLimit = (gridSize / 2) - (boxSize / 2);
+    var averageObjectSize = 100;
+    this.cubeFieldLimit = (gridSize / 2) - (averageObjectSize / 2);
 
     this.saveCubeState = function(){
       console.log(this.cubeX, this.cubeY, this.cubeZ);
@@ -173,12 +158,9 @@ function Canvas(width, height, id){
     window.addEventListener('resize', onWindowResize, false);
     let fieldEl = $('#field-01');
 
-    render();
-    onWindowResize();
 
-
-
-
+    let fieldObjects = {};
+    let fieldArr = [];
 
     function onWindowResize(){
       // camera.aspect = window.innerWidth / window.innerHeight;
@@ -200,17 +182,14 @@ function Canvas(width, height, id){
 
     function onDocumentMouseDown(event) {
       if(INTERSECTED) {
-        INTERSECTED.scale.set(0.85, 0.85, 0.85);
+        fieldObjects[INTERSECTED.name].mouseDown();
       }
     }
 
     function onDocumentMouseUp(event) {
       if(INTERSECTED) {
-        INTERSECTED.scale.set(1, 1, 1);
-
-        let id = '#' + INTERSECTED.name;
-        console.log(id);
-        windows.push(new PageWindow(id, 'body'));
+        // INTERSECTED.mouseUp();
+        fieldObjects[INTERSECTED.name].mouseUp();
       }
     }
 
@@ -233,32 +212,151 @@ function Canvas(width, height, id){
 
       // if there is one (or more) intersections
       if (intersects.length > 0) {
+        console.log(intersects);
         // if the closest object intersected is not the currently stored intersection object
         if (intersects[0].object != INTERSECTED && intersects[0].object.name != 'field') {
           // restore previous intersection object (if it exists) to its original color
-          if (INTERSECTED)
-            INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
+          if (INTERSECTED){
+            // INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
+            console.log(fieldObjects);
+            // INTERSECTED.mouseOut();
+            fieldObjects[INTERSECTED.name].mouseOut();
+          }
           // store reference to closest object as current intersection object
           INTERSECTED = intersects[0].object;
           console.log(intersects[0].object.name);
           // store color of closest object (for later restoration)
-          INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
-          // set a new color for closest object
-          INTERSECTED.material.color.setHex(0x0000ff);
-          $('#field-01').addClass('object--is-hovered');
+          // INTERSECTED.mouseIn();
+          fieldObjects[INTERSECTED.name].mouseIn();
         }
       } else // there are no intersections
       {
         // restore previous intersection object (if it exists) to its original color
-        if (INTERSECTED)
-          INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
-        // remove previous intersection object reference
-        //     by setting current intersection object to "nothing"
-        INTERSECTED = null;
-
-        $('#field-01').removeClass('object--is-hovered');
+        if (INTERSECTED){
+          console.log(fieldObjects);
+          console.log(INTERSECTED.name);
+          fieldObjects[INTERSECTED.name].mouseOut();
+        }
+          // INTERSECTED.mouseOut();
+          // remove previous intersection object reference
+          //     by setting current intersection object to "nothing"
+          INTERSECTED = null;
       }
     }
+
+    function ConceptObject(x, y, z, size, name){
+      var geometry = new THREE.BoxGeometry(size, size, size, 1, 1, 1);
+      // var geometry = new THREE.OctahedronGeometry(size, 1);
+
+    	var material = new THREE.MeshBasicMaterial({color: colors.white});
+    	var cube = new THREE.Mesh(geometry, material);
+      cube.position.y = y;
+
+      this.cubeX = x;
+      this.cubeY = y;
+      this.cubeZ = z;
+
+      this.offsetSpeed = 0.008;
+      this.offset = 0;
+
+
+      // upper and lower limit = (width / 2) - (objectWidth / 2)
+
+      var geo = new THREE.EdgesGeometry( cube.geometry );
+      var mat = new THREE.LineBasicMaterial( { color: colors.black, linewidth: 10} );
+      var wireframe = new THREE.LineSegments( geo, mat );
+      wireframe.renderOrder = 1; // make sure wireframes are rendered 2nd
+      cube.add( wireframe );
+      cube.name = name;
+
+      var outlineMaterial = new THREE.MeshBasicMaterial( { color: colors.green, side: THREE.BackSide } );
+      outlineMaterial.transparent = true;
+      outlineMaterial.opacity = 0.3;
+    	var outlineMesh = new THREE.Mesh( cube.geometry, outlineMaterial );
+      outlineMesh.position.x = x;
+      console.log(y);
+      outlineMesh.position.y = y;
+      outlineMesh.position.z = z;
+
+      let outlineScaleFactor = 0.20;
+    	outlineMesh.scale.multiplyScalar(1 + outlineScaleFactor);
+      outlineMesh.material.visible = false;
+      outlineMesh.name = name;
+    	scene.add( outlineMesh );
+
+      this.mouseIn = function(){
+
+        // cube.currentHex = cube.material.color.getHex();
+
+        outlineMesh.material.visible = true;
+        // set a new color for closest object
+        cube.material.color.setHex(0xffffff);
+        $('#field-01').addClass('object--is-hovered');
+      }
+
+      this.mouseDown = function(){
+        let scaleDownFactor = -0.15;
+        let cubeScale = 1 + scaleDownFactor;
+        let outlineScale = cubeScale + outlineScaleFactor;
+        cube.scale.set(cubeScale, cubeScale, cubeScale);
+        outlineMesh.scale.set(outlineScale, outlineScale, outlineScale);
+      }
+
+      this.mouseOut = function(){
+        cube.material.color.setHex(0xffffff);
+        outlineMesh.material.visible = false;
+        $('#field-01').removeClass('object--is-hovered');
+      }
+
+      this.mouseUp = function(){
+        cube.scale.set(1, 1, 1);
+        let outlineScale = 1 + outlineScaleFactor;
+        outlineMesh.scale.set(outlineScale, outlineScale, outlineScale);
+        this.showWindow();
+      }
+
+      this.showWindow = function(){
+        let id = '#' + cube.name;
+        windows.push(new PageWindow(id, 'body'));
+      }
+
+      this.updatePosition = function(x, y, z){
+        cube.position.x = x;
+        cube.position.y = y;
+        cube.position.z = z;
+      }
+
+      this.move = function(){
+        // this.offset += this.offsetSpeed;
+        outlineMesh.rotation.x = cube.rotation.x += this.offsetSpeed;
+        outlineMesh.rotation.y = cube.rotation.y += this.offsetSpeed;
+        outlineMesh.rotation.z = cube.rotation.z += this.offsetSpeed;
+
+        outlineMesh.position.x = cube.position.x = this.cubeX;
+        outlineMesh.position.y = cube.position.y = this.cubeY;
+        outlineMesh.position.z = cube.position.z = this.cubeZ;
+      }
+
+      this.mesh = cube;
+    }
+
+
+
+    this.object = createObject(0, 75, 0, 100, 'concept-01');
+    this.object2 = createObject(-175, 175, 25, 100, 'concept-02');
+
+    function createObject(x, y, z, size, name){
+      var object = new ConceptObject(x, y, z, size, name);
+      scene.add(object.mesh);
+      fieldObjects[object.mesh.name] = object;
+      fieldArr.push(object);
+
+      return object;
+    }
+
+    render();
+    onWindowResize();
+
 }
 
 $(function(){
@@ -271,9 +369,9 @@ $(function(){
   gui.add(canvas, 'cameraY', -2000, 2000);
   gui.add(canvas, 'cameraZ', -2000, 2000);
 
-  gui.add(canvas, 'cubeX', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
-  gui.add(canvas, 'cubeY', 0, 200);
-  gui.add(canvas, 'cubeZ', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
+  gui.add(canvas.object, 'cubeX', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
+  gui.add(canvas.object, 'cubeY', 0, 200);
+  gui.add(canvas.object, 'cubeZ', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
 
 
   $('#save-cube-state').click(function(e){
