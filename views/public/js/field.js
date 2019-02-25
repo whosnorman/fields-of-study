@@ -14,27 +14,40 @@ let colors = {
   'gray': 0xCFD1D2
 };
 
-let windows = [];
+// let windows = [];
 
 
 function PageWindow(id, parentId) {
-  // jQuery('<div/>', {
-  //   id: id,
-  //   class: 'concept'
-  // }).appendTo(parentId);
+  jQuery('<div/>', {
+    id: id,
+    class: 'concept'
+  }).appendTo('#windows');
 
-  $.get("/concept/01", function(data){
-    console.log(id);
-    console.log($(id));
-      $('#concept-01').append(data);
+  let num = id.split('-')[1];
+  let url = '/concept/' + num;
 
-      $('#window-close').click(function(e){
-        console.log(e);
-        let intoTheVoid = $(windows[0].id).children('div:first').detach();
+  console.log(id);
+  $.get(url, function(data){
+      let idString = '#' + id;
+      $(idString).append(data);
+
+      $(idString).find('#window-close').click(function(e){
+        $(idString).children('div:first').detach();
+        // let intoTheVoid = $(windows[0].id).children('div:first').detach();
       });
 
       let baseUrl = 'http://api.are.na/v2/channels/';
-      let channel = 'findings-in-rhythm';
+      let channel;
+      switch(num){
+        case '01':
+          channel = 'findings-in-rhythm';
+          break;
+        case '02':
+          channel = 'concept-bits-and-bobs';
+          break;
+        default:
+          break;
+      }
 
       $.get(baseUrl + channel, function( data ) {
           let contents = data.contents;
@@ -54,8 +67,6 @@ function PageWindow(id, parentId) {
 
 function createHtmlFromBlock(block){
   let html = '';
-
-  console.log(block);
 
   switch(block.class){
     case 'Text':
@@ -212,32 +223,24 @@ function Canvas(width, height, id){
 
       // if there is one (or more) intersections
       if (intersects.length > 0) {
-        console.log(intersects);
         // if the closest object intersected is not the currently stored intersection object
         if (intersects[0].object != INTERSECTED && intersects[0].object.name != 'field') {
           // restore previous intersection object (if it exists) to its original color
           if (INTERSECTED){
             // INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
-            console.log(fieldObjects);
-            // INTERSECTED.mouseOut();
             fieldObjects[INTERSECTED.name].mouseOut();
           }
           // store reference to closest object as current intersection object
           INTERSECTED = intersects[0].object;
-          console.log(intersects[0].object.name);
           // store color of closest object (for later restoration)
-          // INTERSECTED.mouseIn();
           fieldObjects[INTERSECTED.name].mouseIn();
         }
       } else // there are no intersections
       {
         // restore previous intersection object (if it exists) to its original color
         if (INTERSECTED){
-          console.log(fieldObjects);
-          console.log(INTERSECTED.name);
           fieldObjects[INTERSECTED.name].mouseOut();
         }
-          // INTERSECTED.mouseOut();
           // remove previous intersection object reference
           //     by setting current intersection object to "nothing"
           INTERSECTED = null;
@@ -274,7 +277,6 @@ function Canvas(width, height, id){
       outlineMaterial.opacity = 0.3;
     	var outlineMesh = new THREE.Mesh( cube.geometry, outlineMaterial );
       outlineMesh.position.x = x;
-      console.log(y);
       outlineMesh.position.y = y;
       outlineMesh.position.z = z;
 
@@ -316,8 +318,8 @@ function Canvas(width, height, id){
       }
 
       this.showWindow = function(){
-        let id = '#' + cube.name;
-        windows.push(new PageWindow(id, 'body'));
+        let id = cube.name;
+        let page = new PageWindow(id, 'body');
       }
 
       this.updatePosition = function(x, y, z){
