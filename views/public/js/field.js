@@ -100,6 +100,8 @@ function createHtmlFromBlock(block){
 }
 
 function Canvas(width, height, id){
+    let that = this;
+
 
       // custom global variables
     var raycaster, mouse = {
@@ -137,35 +139,37 @@ function Canvas(width, height, id){
     this.cameraZ = 600;
 
 
-  	var renderer = new THREE.WebGLRenderer({ alpha: true });
+    var renderer = new THREE.WebGLRenderer({ alpha: true });
   	renderer.setSize(width, height);
-    renderer.shadowMap.enabled = true;
-    // renderer.antialias = true;
+    // renderer.shadowMap.enabled = true;
+    renderer.antialias = true;
   	document.getElementById(id).appendChild(renderer.domElement);
 
 
-    let that = this;
-  	function render() {
-  		requestAnimationFrame(render);
 
-      camera.position.x = that.cameraX;
-      camera.position.y = that.cameraY;
-      camera.position.z = that.cameraZ;
-      camera.lookAt(0, 0, 0);
+    //COMPOSER
+    var composer = new THREE.EffectComposer(renderer);
+    var renderPass = new THREE.RenderPass(scene, camera);
+    composer.addPass(renderPass);
 
-      // object.updatePosition(cubeX, cubeY, cubeZ);
+    //custom shader pass
+    var vertShader = document.getElementById('vertexShader').textContent;
+    var fragShader = document.getElementById('fragmentShader').textContent;
+    var counter = 0.0;
+    var myEffect = {
+      uniforms: {
+        "tDiffuse": { value: null },
+        "amount": { value: counter }
+      },
+      vertexShader: vertShader,
+      fragmentShader: fragShader
+    }
 
-      // cube.position.x = that.cubeX;
-      // cube.position.y = that.cubeY;
-      // cube.position.z = that.cubeZ;
+    var customPass = new THREE.ShaderPass(myEffect);
+    customPass.renderToScreen = true;
+    composer.addPass(customPass);
 
-      for(let i = 0; i < fieldArr.length; i++){
-        fieldArr[i].move();
-      }
 
-  		renderer.render(scene, camera);
-      update();
-  	};
 
 
     // create a grid
@@ -416,8 +420,39 @@ function Canvas(width, height, id){
     }
 
 
+
+
     render();
     onWindowResize();
+
+
+  	function render() {
+
+      camera.position.x = that.cameraX;
+      camera.position.y = that.cameraY;
+      camera.position.z = that.cameraZ;
+      camera.lookAt(0, 0, 0);
+
+      // object.updatePosition(cubeX, cubeY, cubeZ);
+
+      // cube.position.x = that.cubeX;
+      // cube.position.y = that.cubeY;
+      // cube.position.z = that.cubeZ;
+
+      for(let i = 0; i < fieldArr.length; i++){
+        fieldArr[i].move();
+      }
+
+
+      // for composer
+      counter += 0.02;
+      customPass.uniforms["amount"].value = counter;
+
+  		renderer.render(scene, camera);
+      requestAnimationFrame(render);
+      // composer.render();
+      // update();
+  	};
 
 }
 
