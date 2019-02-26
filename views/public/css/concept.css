@@ -1,4 +1,14 @@
+.window-container {
+  position: absolute;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  pointer-events: none;
+}
+
 .concept {
+  pointer-events: all;
   position: absolute;
   left: 50%;
   top: 40%;

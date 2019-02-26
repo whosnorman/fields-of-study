@@ -8,14 +8,6 @@
   position: relative;
 }
 
-.window-container {
-  position: absolute;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  top: 0;
-}
-
 html, body {
   height: 100%;
   width: 100%;

@@ -141,7 +141,7 @@ function Canvas(width, height, id){
 
     var renderer = new THREE.WebGLRenderer({ alpha: true });
   	renderer.setSize(width, height);
-    // renderer.shadowMap.enabled = true;
+    renderer.shadowMap.enabled = true;
     renderer.antialias = true;
   	document.getElementById(id).appendChild(renderer.domElement);
 
@@ -256,16 +256,18 @@ function Canvas(width, height, id){
       // if there is one (or more) intersections
       if (intersects.length > 0) {
         // if the closest object intersected is not the currently stored intersection object
-        if (intersects[0].object != INTERSECTED && intersects[0].object.name != 'field-01') {
+        if (intersects[0].object != INTERSECTED) {
           // restore previous intersection object (if it exists) to its original color
           if (INTERSECTED){
             // INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
             fieldObjects[INTERSECTED.name].mouseOut();
           }
           // store reference to closest object as current intersection object
-          INTERSECTED = intersects[0].object;
-          // store color of closest object (for later restoration)
-          fieldObjects[INTERSECTED.name].mouseIn();
+          if (intersects[0].object.name != 'field-01'){
+            INTERSECTED = intersects[0].object;
+            // store color of closest object (for later restoration)
+            fieldObjects[INTERSECTED.name].mouseIn();
+          }
         }
       } else // there are no intersections
       {
@@ -279,9 +281,17 @@ function Canvas(width, height, id){
       }
     }
 
-    function ConceptObject(x, y, z, size, name){
-      var geometry = new THREE.BoxGeometry(size, size, size, 1, 1, 1);
-      // var geometry = new THREE.OctahedronGeometry(size, 1);
+    function ConceptObject(x, y, z, size, name, type){
+      let geometry;
+
+      switch(type){
+        case 'box':
+          geometry = new THREE.BoxGeometry(size, size, size, 1, 1, 1);
+          break;
+        case 'sphere':
+          geometry = new THREE.OctahedronGeometry(size, 2);
+          break;
+      }
 
     	var material = new THREE.MeshLambertMaterial({color: colors.pink});
     	var cube = new THREE.Mesh(geometry, material);
@@ -306,9 +316,9 @@ function Canvas(width, height, id){
       cube.castShadow = true;
       cube.receiveShadow = true;
 
-      var outlineMaterial = new THREE.MeshBasicMaterial( { color: colors.white, side: THREE.BackSide } );
+      var outlineMaterial = new THREE.MeshBasicMaterial( { color: colors.pink, side: THREE.BackSide } );
       outlineMaterial.transparent = true;
-      outlineMaterial.opacity = 0.4;
+      outlineMaterial.opacity = 0.5;
     	var outlineMesh = new THREE.Mesh( cube.geometry, outlineMaterial );
       outlineMesh.position.x = x;
       outlineMesh.position.y = y;
@@ -378,14 +388,14 @@ function Canvas(width, height, id){
 
 
 
-    this.object = createObject(0, 75, 0, 100, 'concept-01');
-    this.object2 = createObject(-175, 175, 25, 100, 'concept-02');
+    this.object = createObject(82, 200, -158, 100, 'concept-01', 'box');
+    this.object2 = createObject(-300, 135, -75, 75, 'concept-02', 'sphere');
     let field = new Field(5000, 5000, 500, 500, 'field-01');
 
     let objects = [this.object, this.object2];
 
-    function createObject(x, y, z, size, name){
-      var object = new ConceptObject(x, y, z, size, name);
+    function createObject(x, y, z, size, name, type){
+      var object = new ConceptObject(x, y, z, size, name, type);
       scene.add(object.mesh);
       fieldObjects[object.mesh.name] = object;
       fieldArr.push(object);
@@ -451,7 +461,7 @@ function Canvas(width, height, id){
   		renderer.render(scene, camera);
       requestAnimationFrame(render);
       // composer.render();
-      // update();
+      update();
   	};
 
 }
