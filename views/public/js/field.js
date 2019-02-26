@@ -23,16 +23,19 @@ function PageWindow(id, parentId) {
     class: 'concept'
   }).appendTo('#windows');
 
+  let idString = '#' + id;
   let num = id.split('-')[1];
+
+  $(idString).draggable({handle:'.concept_topbar'});
+
   let url = '/concept/' + num;
 
   console.log(id);
   $.get(url, function(data){
-      let idString = '#' + id;
       $(idString).append(data);
 
       $(idString).find('#window-close').click(function(e){
-        $(idString).children('div:first').detach();
+        $(idString).detach();
         // let intoTheVoid = $(windows[0].id).children('div:first').detach();
       });
 
@@ -57,9 +60,16 @@ function PageWindow(id, parentId) {
             $('<div/>', {
               class: 'arena_block',
               html: html
-            }).appendTo('#arena-01');
+            }).appendTo('#arena-' + num);
           }
       });
+  });
+
+  $(idString).resizable({
+    maxHeight: 800,
+    maxWidth: 800,
+    minHeight: 400,
+    minWidth: 400
   });
 
   this.id = id;
@@ -99,6 +109,23 @@ function Canvas(width, height, id){
       INTERSECTED = null;
 
     var scene = new THREE.Scene();
+    // LIGHTS!
+    var ambient = new THREE.AmbientLight(colors.white, 0.8);
+    scene.add(ambient);
+
+    var sun = new THREE.PointLight(colors.white, 1, 3000);
+    // var sun = new THREE.SpotLight(colors.white, 0.4);
+    sun.position.set(-1000, 2000, 0);
+    sun.castShadow = true;
+    // sun.shadowDarkness = 1;
+    // sun.shadow.camera.near = 1;
+    // sun.shadow.bias = -0.00002;
+    // sun.shadowCameraVisible = true;
+    sun.shadow.camera.far = 4000;
+
+    scene.add(sun);
+
+
   	var camera = new THREE.PerspectiveCamera(75, width/height, 1, 10000);
     camera.position.z = 1000;
     camera.position.y = 300;
@@ -112,6 +139,7 @@ function Canvas(width, height, id){
 
   	var renderer = new THREE.WebGLRenderer({ alpha: true });
   	renderer.setSize(width, height);
+    renderer.shadowMap.enabled = true;
     // renderer.antialias = true;
   	document.getElementById(id).appendChild(renderer.domElement);
 
@@ -142,14 +170,14 @@ function Canvas(width, height, id){
 
     // create a grid
     var gridSize = 700;
-    var gridDivisions = 15;
-
-    var gridHelper = new THREE.GridHelper( gridSize, gridDivisions, 0xff0000, 0xff0000);
-    gridHelper.position.y = -100;
-		gridHelper.position.x = 0;
-    // gridHelper.geometry.rotateX( Math.PI / 10 );
-    gridHelper.name = 'field';
-    scene.add( gridHelper );
+    // var gridDivisions = 15;
+    //
+    // var gridHelper = new THREE.GridHelper( gridSize, gridDivisions, 0xff0000, 0xff0000);
+    // gridHelper.position.y = -100;
+		// gridHelper.position.x = 0;
+    // // gridHelper.geometry.rotateX( Math.PI / 10 );
+    // gridHelper.name = 'field';
+    // scene.add( gridHelper );
 
     var averageObjectSize = 100;
     this.cubeFieldLimit = (gridSize / 2) - (averageObjectSize / 2);
@@ -224,7 +252,7 @@ function Canvas(width, height, id){
       // if there is one (or more) intersections
       if (intersects.length > 0) {
         // if the closest object intersected is not the currently stored intersection object
-        if (intersects[0].object != INTERSECTED && intersects[0].object.name != 'field') {
+        if (intersects[0].object != INTERSECTED && intersects[0].object.name != 'field-01') {
           // restore previous intersection object (if it exists) to its original color
           if (INTERSECTED){
             // INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
@@ -251,7 +279,7 @@ function Canvas(width, height, id){
       var geometry = new THREE.BoxGeometry(size, size, size, 1, 1, 1);
       // var geometry = new THREE.OctahedronGeometry(size, 1);
 
-    	var material = new THREE.MeshBasicMaterial({color: colors.white});
+    	var material = new THREE.MeshLambertMaterial({color: colors.pink});
     	var cube = new THREE.Mesh(geometry, material);
       cube.position.y = y;
 
@@ -269,12 +297,14 @@ function Canvas(width, height, id){
       var mat = new THREE.LineBasicMaterial( { color: colors.black, linewidth: 10} );
       var wireframe = new THREE.LineSegments( geo, mat );
       wireframe.renderOrder = 1; // make sure wireframes are rendered 2nd
-      cube.add( wireframe );
+      // cube.add( wireframe );
       cube.name = name;
+      cube.castShadow = true;
+      cube.receiveShadow = true;
 
-      var outlineMaterial = new THREE.MeshBasicMaterial( { color: colors.green, side: THREE.BackSide } );
+      var outlineMaterial = new THREE.MeshBasicMaterial( { color: colors.white, side: THREE.BackSide } );
       outlineMaterial.transparent = true;
-      outlineMaterial.opacity = 0.3;
+      outlineMaterial.opacity = 0.4;
     	var outlineMesh = new THREE.Mesh( cube.geometry, outlineMaterial );
       outlineMesh.position.x = x;
       outlineMesh.position.y = y;
@@ -292,7 +322,7 @@ function Canvas(width, height, id){
 
         outlineMesh.material.visible = true;
         // set a new color for closest object
-        cube.material.color.setHex(0xffffff);
+        // cube.material.color.setHex(colors.pink);
         $('#field-01').addClass('object--is-hovered');
       }
 
@@ -305,7 +335,7 @@ function Canvas(width, height, id){
       }
 
       this.mouseOut = function(){
-        cube.material.color.setHex(0xffffff);
+        // cube.material.color.setHex(colors.pink);
         outlineMesh.material.visible = false;
         $('#field-01').removeClass('object--is-hovered');
       }
@@ -346,6 +376,9 @@ function Canvas(width, height, id){
 
     this.object = createObject(0, 75, 0, 100, 'concept-01');
     this.object2 = createObject(-175, 175, 25, 100, 'concept-02');
+    let field = new Field(5000, 5000, 500, 500, 'field-01');
+
+    let objects = [this.object, this.object2];
 
     function createObject(x, y, z, size, name){
       var object = new ConceptObject(x, y, z, size, name);
@@ -356,13 +389,40 @@ function Canvas(width, height, id){
       return object;
     }
 
+    function Field(width, height, widthSegments, heightSegments, name) {
+      var geometry = new THREE.PlaneBufferGeometry( width, height, widthSegments, heightSegments);
+      var material = new THREE.MeshLambertMaterial({color: colors.green});
+      var terrain = new THREE.Mesh( geometry, material );
+      terrain.rotation.x = -Math.PI / 2;
+      terrain.name = name;
+
+      var peak = 60;
+      var smoothing = 300;
+      var vertices = terrain.geometry.attributes.position.array;
+      for (var i = 0; i <= vertices.length; i += 3) {
+          vertices[i+2] = peak * perlin.noise(
+              vertices[i]/smoothing,
+              vertices[i+1]/smoothing
+          );
+      }
+      terrain.geometry.attributes.position.needsUpdate = true;
+      terrain.geometry.computeVertexNormals();
+
+      terrain.receiveShadow = true;
+
+      scene.add( terrain );
+      // scene.fog = new THREE.FogExp2(colors.white, 0.0004);
+      scene.fog = new THREE.Fog(colors.white, 1500, 3000);
+    }
+
+
     render();
     onWindowResize();
 
 }
 
 $(function(){
-  let canvas = new Canvas(500, 500, 'field-01');
+  let canvas = new Canvas(1000, 1000, 'field-01');
 
   // create dat GUI
   const gui = new dat.GUI();
@@ -375,6 +435,11 @@ $(function(){
   gui.add(canvas.object, 'cubeY', 0, 200);
   gui.add(canvas.object, 'cubeZ', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
 
+  gui.add(canvas.object2, 'cubeX', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
+  gui.add(canvas.object2, 'cubeY', 0, 200);
+  gui.add(canvas.object2, 'cubeZ', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
+
+  gui.close();
 
   $('#save-cube-state').click(function(e){
     canvas.saveCubeState();

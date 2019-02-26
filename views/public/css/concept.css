@@ -2,8 +2,10 @@
   position: absolute;
   left: 50%;
   top: 40%;
+  width: 400px;
   height: 400px;
-  width: 410px;
+  min-height: 400px;
+  min-width: 400px;
 }
 
 .concept_window {
@@ -18,6 +20,10 @@
   border-bottom: 1px solid black;
   background: black;
   position: relative;
+}
+
+.concept_topbar:hover {
+  cursor: move;
 }
 
 .concept_topbar .concept_topbar_close {
