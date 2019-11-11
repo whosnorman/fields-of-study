@@ -3,3 +3,51 @@
   src: url('/fonts/Souvenir-Bold.otf');
   font-weight: 600;
 } */
+
+body {
+  margin: 0;
+}
+
+h1 {
+  font-family: 'ITC Souvenir', serif;
+  font-size: 32px;
+  letter-spacing: 1px;
+  line-height: 38px;
+  margin-top: 0;
+}
+
+h2 {
+  font-family: 'ITC Souvenir', serif;
+  font-size: 24px;
+  line-height: 30px;
+  margin-top: 0;
+}
+
+p {
+  font-family: 'ITC Avant Garde Gothic Pro', sans-serif;
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.seeds {
+  width: 30%;
+  height: 70%;
+  position: absolute;
+  z-index: 100;
+  left: 10%;
+  top: 5%;
+}
+
+.seeds__input {
+  font-family: 'ITC Avant Garde Gothic Pro', sans-serif;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  border: 0;
+  outline: 0;
+  resize: none;
+  height: 100%;
+  background: none;
+  overflow-y: scroll;
+}

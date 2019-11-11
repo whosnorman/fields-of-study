@@ -15,6 +15,7 @@ let colors = {
 };
 
 // let windows = [];
+let SHOW_CONTROLS = true;
 
 
 function PageWindow(id, parentId) {
@@ -134,9 +135,9 @@ function Canvas(width, height, id){
     camera.position.x = -500;
 
     this.camera = camera;
-    this.cameraX = -600;
-    this.cameraY = 600;
-    this.cameraZ = 600;
+    this.cameraX = -800;
+    this.cameraY = 430;
+    this.cameraZ = 500; // at first all of these were 600
 
 
     var renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -470,21 +471,23 @@ $(function(){
   let canvas = new Canvas(1000, 1000, 'field-01');
 
   // create dat GUI
-  const gui = new dat.GUI();
+  if(SHOW_CONTROLS) {
+    const gui = new dat.GUI();
 
-  gui.add(canvas, 'cameraX', -2000, 2000);
-  gui.add(canvas, 'cameraY', -2000, 2000);
-  gui.add(canvas, 'cameraZ', -2000, 2000);
+    gui.add(canvas, 'cameraX', -2000, 2000);
+    gui.add(canvas, 'cameraY', -2000, 2000);
+    gui.add(canvas, 'cameraZ', -2000, 2000);
 
-  gui.add(canvas.object, 'cubeX', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
-  gui.add(canvas.object, 'cubeY', 0, 200);
-  gui.add(canvas.object, 'cubeZ', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
+    gui.add(canvas.object, 'cubeX', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
+    gui.add(canvas.object, 'cubeY', 0, 200);
+    gui.add(canvas.object, 'cubeZ', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
 
-  gui.add(canvas.object2, 'cubeX', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
-  gui.add(canvas.object2, 'cubeY', 0, 200);
-  gui.add(canvas.object2, 'cubeZ', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
+    gui.add(canvas.object2, 'cubeX', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
+    gui.add(canvas.object2, 'cubeY', 0, 200);
+    gui.add(canvas.object2, 'cubeZ', -canvas.cubeFieldLimit, canvas.cubeFieldLimit);
 
-  gui.close();
+    gui.close();
+  }
 
   $('#save-cube-state').click(function(e){
     canvas.saveCubeState();
